@@ -1,38 +1,51 @@
 def cadastrar_item(cardapio):
-    try:
-        id_item = int(input("Digite o ID do item: "))
-    except ValueError:
-        print("Erro: O ID deve ser um número inteiro.")
-        return
 
+    while True:
+        try:
+            id_item = int(input("Digite o ID do item: "))
+            break  
+        except ValueError:
+            print("Erro: O ID deve ser um número inteiro.")
+
+    # Verifica se o ID já existe
     for item in cardapio:
         if item["id"] == id_item:
             print("Erro: Já existe um item cadastrado com este ID!")
             return
 
-    nome = input("Digite o nome do prato: ").strip().title()
 
-    try:
-        preco = float(input("Digite o preço (R$): "))
-    except ValueError:
-        print("Erro: Preço inválido.")
-        return
+    while True:
+        nome = input("Digite o nome do prato: ").strip().title()
+        if nome:
+            break 
+        print("Erro: O nome do prato não pode estar em branco.")
+
+    # Validação do Preço
+    while True:
+        try:
+            preco = float(input("Digite o preço (R$): "))
+            if preco > 0:
+                break  
+            print("Erro: O preço deve ser maior que zero.")
+        except ValueError:
+            print("Erro: Preço inválido.")
 
     cardapio.append({
         "id": id_item,
         "nome": nome,
         "preco": preco
-        })
-        
+    })
+
     print(f"Item '{nome}' cadastrado com sucesso!")
 
 
 def remover_item(cardapio):
-    try:
-        id_item = int(input("Digite o ID do item a ser removido: "))
-    except ValueError:
-        print("Erro: O ID deve ser um número inteiro.")
-        return
+    while True:
+        try:
+            id_item = int(input("Digite o ID do item a ser removido: "))
+            break 
+        except ValueError:
+            print("Erro: O ID deve ser um número inteiro.")
 
     for item in cardapio:
         if item["id"] == id_item:
@@ -44,13 +57,12 @@ def remover_item(cardapio):
 
 
 def exibir_cardapio(cardapio):
-
     if not cardapio:
         print("\nO cardápio está vazio.")
-        return
+        return  
 
     print("\n           CARDÁPIO")
-   
+
     for item in cardapio:
         print(f"ID: {item['id']}")
         print(f"Prato: {item['nome']}")
