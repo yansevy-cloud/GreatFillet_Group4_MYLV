@@ -27,4 +27,6 @@ def exibir_menu():
     8. Visualizar Histórico de Ações
     0. Sair
     """)
-    
+
+def obter_opcao():
+    return input("Digite o número da opção desejada: ")
