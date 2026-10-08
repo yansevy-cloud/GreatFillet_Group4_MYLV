@@ -5,6 +5,12 @@
 # Onde fica: Chamada sempre que uma ação que pode ser desfeita for executada (ex: cadastrar item, remover item, lançar pedido, atender pedido)
 def registrar_acao(pilha_historico, tipo_acao, dados):
     # TODO: Implementar o registro da ação empilhando na pilha_historico (push)
+    def registrar_acao(pilha_historico, tipo_acao, dados):
+        acao = {
+            "tipo": tipo_acao,
+            "dados": dados.copy()
+        }
+        pilha_historico.push(acao) 
     pass
 
 
