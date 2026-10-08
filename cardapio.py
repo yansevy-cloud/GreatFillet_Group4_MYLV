@@ -1,5 +1,4 @@
 def cadastrar_item(cardapio):
-
     while True:
         try:
             id_item = int(input("Digite o ID do item: "))
@@ -12,7 +11,6 @@ def cadastrar_item(cardapio):
         if item["id"] == id_item:
             print("Erro: Já existe um item cadastrado com este ID!")
             return
-
 
     while True:
         nome = input("Digite o nome do prato: ").strip().title()
@@ -67,3 +65,10 @@ def exibir_cardapio(cardapio):
         print(f"ID: {item['id']}")
         print(f"Prato: {item['nome']}")
         print(f"Preço: R$ {item['preco']:.2f}")
+
+
+# Função: buscar_item
+# Onde fica: Função auxiliar do cardápio para pesquisar e retornar um item pelo seu ID
+def buscar_item(cardapio, id_item):
+    # TODO: Implementar busca do item por ID no cardápio
+    pass

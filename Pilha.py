@@ -9,6 +9,7 @@ class Pilha:
     def pop(self):
         if self.isEmpty():
             print("Erro ao remover. Não há elementos na pilha")
+            return None
 
         return self._elementos.pop()
         
