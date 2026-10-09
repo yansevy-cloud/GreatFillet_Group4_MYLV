@@ -1,13 +1,8 @@
 from Fila import Fila
 from historico import registrar_acao
 
-'''
-Fila da Cozinha (Estrutura: Classe Fila fornecida):
-Gerencia a ordem dos pedidos aguardando preparo.
-O primeiro pedido cadastrado é o primeiro a ser atendido (FIFO).
-'''
 
-# RF-04: Lançar Pedido
+
 def popular_fila(filaCozinha, cardapio, pilha_historico):
     while True:
         nome = input(
@@ -61,10 +56,8 @@ def popular_fila(filaCozinha, cardapio, pilha_historico):
             PedidoCliente["CLIENTE"] = nome
             PedidoCliente["PEDIDOS"] = ItensPedidos
 
-            # Adiciona o pedido ao final da fila
             filaCozinha.entrar(PedidoCliente)
 
-            # Registra o lançamento na pilha de histórico
             registrar_acao(
                 pilha_historico,
                 "lancar_pedido",
@@ -82,20 +75,19 @@ def popular_fila(filaCozinha, cardapio, pilha_historico):
             )
 
 
-# RF-05: Atender Pedido
+
 def atender_pedido(filaCozinha, pilha_historico):
     if filaCozinha.isEmpty():
         print("\nNão há pedidos para atender.")
         return
 
-    # Retira o pedido mais antigo da fila
+
     pedido = filaCozinha.chamar()
 
     if pedido is None:
         print("\nNão foi possível obter o pedido.")
         return
 
-    # Registra o atendimento para permitir desfazer
     registrar_acao(
         pilha_historico,
         "atender_pedido",
@@ -108,7 +100,7 @@ def atender_pedido(filaCozinha, pilha_historico):
     )
 
 
-# RF-06: Visualizar Fila
+
 def mostrar_pedidos(filaCozinha):
     print("\nPedidos a serem preparados:")
 
