@@ -1,9 +1,3 @@
-# Módulo de Histórico: Gerenciamento da Pilha de Ações (LIFO)
-# Responsável por registrar, visualizar e desfazer ações do sistema
-
-# Função: registrar_acao
-# Onde fica: Chamada sempre que uma ação que pode ser desfeita for executada (ex: cadastrar item, remover item, lançar pedido, atender pedido)
-    # TODO: Implementar o registro da ação empilhando na pilha_historico (push)
 def registrar_acao(pilha_historico, tipo_acao, dados):
     acao = {
         "tipo": tipo_acao,
@@ -11,8 +5,6 @@ def registrar_acao(pilha_historico, tipo_acao, dados):
     }
     pilha_historico.push(acao)
 
-
-# Desfaz a última ação registrada
 def desfazer_ultima_acao(pilha_historico, fila_cozinha, cardapio=None):
     if pilha_historico.isEmpty():
         print("Não há ações para desfazer.")
@@ -22,7 +14,6 @@ def desfazer_ultima_acao(pilha_historico, fila_cozinha, cardapio=None):
     tipo_acao = acao["tipo"]
     dados = acao["dados"]
 
-    # Desfaz o cadastro de um prato
     if tipo_acao == "cadastrar_item":
         if cardapio is None:
             pilha_historico.push(acao)
@@ -41,7 +32,6 @@ def desfazer_ultima_acao(pilha_historico, fila_cozinha, cardapio=None):
             pilha_historico.push(acao)
             print("Prato não encontrado no cardápio.")
 
-    # Desfaz a remoção de um prato
     elif tipo_acao == "remover_item":
         if cardapio is None:
             pilha_historico.push(acao)
@@ -55,11 +45,9 @@ def desfazer_ultima_acao(pilha_historico, fila_cozinha, cardapio=None):
             pilha_historico.push(acao)
             print("Já existe um prato com esse ID no cardápio.")
 
-    # Desfaz o lançamento de um pedido
     elif tipo_acao == "lancar_pedido":
         pedidos = fila_cozinha._pacientes
 
-        # Procura da última posição para a primeira
         indice = next(
             (
                 i for i in range(len(pedidos) - 1, -1, -1)
@@ -75,7 +63,6 @@ def desfazer_ultima_acao(pilha_historico, fila_cozinha, cardapio=None):
             pilha_historico.push(acao)
             print("Pedido não encontrado na fila.")
 
-    # Desfaz o atendimento de um pedido
     elif tipo_acao == "atender_pedido":
         fila_cozinha._pacientes.insert(0, dados.copy())
         print("Pedido devolvido ao início da fila.")
