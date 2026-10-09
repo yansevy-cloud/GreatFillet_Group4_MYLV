@@ -35,7 +35,7 @@ def cadastrar_item(cardapio):
     })
 
     print(f"Item '{nome}' cadastrado com sucesso!")
-    registrar_acao(pilha_historico, "cadastrar_item", cardapio[-1])
+    
 
 
 def remover_item(cardapio):
@@ -53,7 +53,7 @@ def remover_item(cardapio):
             return
 
     print("Erro: Item com este ID não foi encontrado no cardápio.")
-    registrar_acao(pilha_historico, "remover_item", item)
+    
 
 
 def exibir_cardapio(cardapio):
@@ -72,5 +72,8 @@ def exibir_cardapio(cardapio):
 # Função: buscar_item
 # Onde fica: Função auxiliar do cardápio para pesquisar e retornar um item pelo seu ID
 def buscar_item(cardapio, id_item):
-    # TODO: Implementar busca do item por ID no cardápio
-    pass
+    for item in cardapio:
+        if item["id"] == id_item:
+            return item
+
+    return None
