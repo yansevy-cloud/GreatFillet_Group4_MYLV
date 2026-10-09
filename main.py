@@ -15,6 +15,9 @@
 #
 # 3. Execução: chamar main() no final.
 
+# Arquivo Principal: main.py
+# Ponto de entrada do sistema.
+
 from Interface.menu import exibir_menu, obter_opcao
 from ClasseFila import Fila
 from Pilha import Pilha
@@ -22,9 +25,9 @@ from cardapio import cadastrar_item, remover_item, exibir_cardapio
 from cozinha import popular_fila, atender_pedido, mostrar_pedidos
 from historico import desfazer_ultima_acao, visualizar_historico
 
-# Função Principal: main
-# Onde fica: Ponto de entrada da aplicação que orquestra o fluxo do menu e a chamada das funções
+
 def main():
+    # Inicializa as estruturas de dados
     cardapio = []
     fila_cozinha = Fila()
     pilha_historico = Pilha()
@@ -32,30 +35,50 @@ def main():
     while True:
         exibir_menu()
         opcao = obter_opcao()
+
         match opcao:
             case '1':
-                cadastrar_item(cardapio)
+                cadastrar_item(cardapio, pilha_historico)
+
             case '2':
-                remover_item(cardapio)
+                remover_item(cardapio, pilha_historico)
+
             case '3':
                 exibir_cardapio(cardapio)
+
             case '4':
-                popular_fila(fila_cozinha, cardapio)
+                popular_fila(
+                    fila_cozinha,
+                    cardapio,
+                    pilha_historico
+                )
+
             case '5':
-                atender_pedido(fila_cozinha)
+                atender_pedido(
+                    fila_cozinha,
+                    pilha_historico
+                )
+
             case '6':
                 mostrar_pedidos(fila_cozinha)
+
             case '7':
-                # Chama a função de desfazer última ação do módulo historico.py
-                desfazer_ultima_acao(pilha_historico, fila_cozinha, cardapio)
+                desfazer_ultima_acao(
+                    pilha_historico,
+                    fila_cozinha,
+                    cardapio
+                )
+
             case '8':
-                # Chama a função de visualizar histórico de ações do módulo historico.py
                 visualizar_historico(pilha_historico)
+
             case '0':
                 print("Encerrando o sistema...")
                 break
+
             case _:
                 print("Opção inválida!")
+
 
 if __name__ == "__main__":
     main()
