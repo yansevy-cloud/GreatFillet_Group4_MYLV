@@ -1,4 +1,6 @@
 from ClasseFila import Fila
+from ClasseFila import Fila
+from historico import registrar_acao
 
 '''
 Fila da Cozinha (Estrutura: Classe Fila fornecida): 
