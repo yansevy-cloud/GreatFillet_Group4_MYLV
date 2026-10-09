@@ -1,15 +1,20 @@
 import io
 import tkinter as tk
+from collections import Counter
 from contextlib import redirect_stdout
 from tkinter import ttk, messagebox
 
 from cardapio import buscar_item
 from historico import registrar_acao, desfazer_ultima_acao
 
+COR_FUNDO = "#F5F1EA"
+COR_TITULO = "#1F3A4D"
+COR_OK = "#2E7D32"
+COR_ERRO = "#C62828"
+COR_AVISO = "#EF6C00"
+COR_INFO = "#1F3A4D"
 
-# ----------------------------------------------------------------------
-# Funções do menu de console (mantidas apenas por compatibilidade)
-# ----------------------------------------------------------------------
+
 def exibir_menu():
     print("""
     1. Cadastrar Item no Cardápio
@@ -28,30 +33,12 @@ def obter_opcao():
     return input("Digite o número da opção desejada: ")
 
 
-# ----------------------------------------------------------------------
-# Interface gráfica
-# ----------------------------------------------------------------------
-COR_FUNDO = "#F5F1EA"
-COR_TITULO = "#1F3A4D"
-COR_OK = "#2E7D32"
-COR_ERRO = "#C62828"
-COR_AVISO = "#EF6C00"
-COR_INFO = "#1F3A4D"
-
-
 class AppRestaurante:
-    """Janela principal. Recebe as estruturas de dados já criadas no main:
-    - cardapio: list nativa
-    - fila_cozinha: classe Fila
-    - pilha_historico: classe Pilha
-    A lógica das estruturas continua nos módulos originais; aqui fica só a tela.
-    """
-
     def __init__(self, cardapio, fila_cozinha, pilha_historico):
         self.cardapio = cardapio
         self.fila = fila_cozinha
         self.pilha = pilha_historico
-        self.itens_pedido = []  # IDs do pedido que está sendo montado
+        self.itens_pedido = []
 
         self.janela = tk.Tk()
         self.janela.title("RESTAURANTE GREAT FILLET")
@@ -61,13 +48,14 @@ class AppRestaurante:
 
         self._estilos()
         self._montar_cabecalho()
-        self._montar_status()  # antes das abas, para o rodapé reservar espaço
+        self._montar_status()
         self._montar_abas()
         self.atualizar_tudo()
 
-    # ------------------------------------------------------------------
-    # Montagem da tela
-    # ------------------------------------------------------------------
+    # Opção 0: Sair / Executar Interface
+    def executar(self):
+        self.janela.mainloop()
+
     def _estilos(self):
         estilo = ttk.Style(self.janela)
         try:
@@ -126,7 +114,6 @@ class AppRestaurante:
         self._montar_aba_cozinha()
         self._montar_aba_historico()
 
-    # ----- Aba Cardápio ------------------------------------------------
     def _montar_aba_cardapio(self):
         form = ttk.LabelFrame(self.aba_cardapio, text="Cadastrar item", padding=10)
         form.pack(fill="x")
@@ -170,7 +157,6 @@ class AppRestaurante:
         botoes.pack(fill="x", pady=(10, 0))
         self._botao(botoes, "Remover item selecionado", self.remover_item, "#f44336").pack(side="left")
 
-    # ----- Aba Cozinha -------------------------------------------------
     def _montar_aba_cozinha(self):
         esquerda = ttk.LabelFrame(self.aba_cozinha, text="Lançar novo pedido", padding=10)
         esquerda.pack(side="left", fill="both", expand=True, padx=(0, 5))
@@ -178,7 +164,6 @@ class AppRestaurante:
         direita = ttk.LabelFrame(self.aba_cozinha, text="Fila da cozinha (FIFO)", padding=10)
         direita.pack(side="left", fill="both", expand=True, padx=(5, 0))
 
-        # --- formulário de pedido
         linha = tk.Frame(esquerda, bg=COR_FUNDO)
         linha.pack(fill="x")
         ttk.Label(linha, text="Cliente:").pack(side="left")
@@ -227,7 +212,6 @@ class AppRestaurante:
         self._botao(botoes, "Lançar pedido", self.lancar_pedido,
                     "#FF9800").pack(side="right")
 
-        # --- fila
         frame_fila = tk.Frame(direita, bg=COR_FUNDO)
         frame_fila.pack(fill="both", expand=True)
         self.tree_fila = ttk.Treeview(
@@ -250,7 +234,6 @@ class AppRestaurante:
         self._botao(direita, "Atender Próximo Pedido", self.atender_pedido,
                     "#FF5722").pack(fill="x", pady=(8, 0))
 
-    # ----- Aba Histórico -----------------------------------------------
     def _montar_aba_historico(self):
         topo = tk.Frame(self.aba_historico, bg=COR_FUNDO)
         topo.pack(fill="x")
@@ -279,29 +262,12 @@ class AppRestaurante:
         self.tree_historico.pack(side="left", fill="both", expand=True)
         b.pack(side="right", fill="y")
 
-    # ------------------------------------------------------------------
-    # Mensagens
-    # ------------------------------------------------------------------
-    def _status(self, texto, cor=COR_INFO):
-        self.var_status.set(texto)
-        self.lbl_status.configure(fg=cor)
-
-    def _erro(self, texto):
-        self._status("Erro: " + texto, COR_ERRO)
-        messagebox.showerror("Erro", texto, parent=self.janela)
-
-    def _aviso(self, texto):
-        self._status("Aviso: " + texto, COR_AVISO)
-        messagebox.showwarning("Aviso", texto, parent=self.janela)
-
-    # ------------------------------------------------------------------
-    # Atualização das listas visuais
-    # ------------------------------------------------------------------
     def atualizar_tudo(self):
         self.atualizar_cardapio()
         self.atualizar_fila()
         self.atualizar_historico()
 
+    # Opção 3: Listar Cardápio
     def atualizar_cardapio(self):
         for tree in (self.tree_cardapio, self.tree_cardapio_pedido):
             tree.delete(*tree.get_children())
@@ -310,13 +276,27 @@ class AppRestaurante:
                     item["id"], item["nome"], f"R$ {item['preco']:.2f}"))
 
     def _descrever_itens(self, ids):
-        partes = []
-        for id_item in ids:
-            item = buscar_item(self.cardapio, id_item)
-            nome = item["nome"] if item else "(removido)"
-            partes.append(f"{id_item}-{nome}")
-        return ", ".join(partes)
+        if not ids:
+            return ""
 
+        contagem_ids = Counter(ids)
+        partes = []
+        valor_total = 0.0
+
+        for id_item, qtd in contagem_ids.items():
+            item = buscar_item(self.cardapio, id_item)
+            if item:
+                nome = item["nome"]
+                preco = item["preco"]
+                valor_total += preco * qtd
+                partes.append(f"{qtd}x {nome}")
+            else:
+                partes.append(f"{qtd}x (removido)")
+
+        resumo_itens = ", ".join(partes)
+        return f"{resumo_itens} | Total: R$ {valor_total:.2f}"
+
+    # Opção 6: Visualizar Fila da Cozinha
     def atualizar_fila(self):
         self.tree_fila.delete(*self.tree_fila.get_children())
         for i, pedido in enumerate(self.fila._pacientes, start=1):
@@ -324,6 +304,7 @@ class AppRestaurante:
                 i, pedido["CLIENTE"], self._descrever_itens(pedido["PEDIDOS"])))
         self.var_tamanho_fila.set(f"Pedidos aguardando: {self.fila.size()}")
 
+    # Opção 8: Visualizar Histórico de Ações
     def atualizar_historico(self):
         self.tree_historico.delete(*self.tree_historico.get_children())
         total = self.pilha.size()
@@ -339,9 +320,19 @@ class AppRestaurante:
             nome = item["nome"] if item else "(removido)"
             self.lista_pedido.insert("end", f"{id_item} - {nome}")
 
-    # ------------------------------------------------------------------
-    # Ações: Cardápio
-    # ------------------------------------------------------------------
+    def _status(self, texto, cor=COR_INFO):
+        self.var_status.set(texto)
+        self.lbl_status.configure(fg=cor)
+
+    def _erro(self, texto):
+        self._status("Erro: " + texto, COR_ERRO)
+        messagebox.showerror("Erro", texto, parent=self.janela)
+
+    def _aviso(self, texto):
+        self._status("Aviso: " + texto, COR_AVISO)
+        messagebox.showwarning("Aviso", texto, parent=self.janela)
+
+    # Opção 1: Cadastrar Item no Cardápio
     def cadastrar_item(self):
         try:
             id_item = int(self.var_id.get().strip())
@@ -376,6 +367,7 @@ class AppRestaurante:
         self.atualizar_tudo()
         self._status(f"Item '{nome}' cadastrado com sucesso!", COR_OK)
 
+    # Opção 2: Remover Item do Cardápio
     def remover_item(self):
         selecao = self.tree_cardapio.selection()
         if not selecao:
@@ -403,9 +395,7 @@ class AppRestaurante:
         self.atualizar_tudo()
         self._status(f"Item ID {id_item} removido com sucesso!", COR_OK)
 
-    # ------------------------------------------------------------------
-    # Ações: Pedidos / Cozinha
-    # ------------------------------------------------------------------
+    # Auxiliar da Opção 4 (Adiciona item na lista temporária do pedido)
     def adicionar_ao_pedido(self):
         selecao = self.tree_cardapio_pedido.selection()
         if not selecao:
@@ -422,6 +412,7 @@ class AppRestaurante:
         self.atualizar_pedido_atual()
         self._status("Item(ns) adicionado(s) ao pedido.", COR_INFO)
 
+    # Auxiliar da Opção 4 (Remove item da lista temporária do pedido)
     def remover_do_pedido(self):
         selecao = self.lista_pedido.curselection()
         if not selecao:
@@ -430,6 +421,7 @@ class AppRestaurante:
         self.itens_pedido.pop(selecao[0])
         self.atualizar_pedido_atual()
 
+    # Opção 4: Lançar Novo Pedido
     def lancar_pedido(self):
         nome = self.var_cliente.get().strip().title()
         if not nome:
@@ -449,6 +441,7 @@ class AppRestaurante:
         self.atualizar_tudo()
         self._status(f"Pedido do cliente '{nome}' enviado para a cozinha!", COR_OK)
 
+    # Opção 5: Atender Próximo Pedido
     def atender_pedido(self):
         if self.fila.isEmpty():
             self._aviso("Não há pedidos para atender.")
@@ -471,15 +464,12 @@ class AppRestaurante:
             f"Cliente: {pedido['CLIENTE']}\nItens: {itens}",
             parent=self.janela)
 
-    # ------------------------------------------------------------------
-    # Ações: Histórico
-    # ------------------------------------------------------------------
+    # Opção 7: Desfazer Última Ação
     def desfazer_acao(self):
         if self.pilha.isEmpty():
             self._aviso("Não há ações para desfazer.")
             return
 
-        # A função original usa print(); capturamos o texto para mostrar na tela.
         saida = io.StringIO()
         with redirect_stdout(saida):
             desfazer_ultima_acao(self.pilha, self.fila, self.cardapio)
@@ -488,10 +478,6 @@ class AppRestaurante:
         self.atualizar_tudo()
         self.atualizar_pedido_atual()
         self._status(mensagem, COR_OK)
-
-    # ------------------------------------------------------------------
-    def executar(self):
-        self.janela.mainloop()
 
 
 def janelaprincipa(cardapio, fila_cozinha, pilha_historico):
