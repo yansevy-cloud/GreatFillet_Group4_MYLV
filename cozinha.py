@@ -1,4 +1,4 @@
-from ClasseFila import Fila
+from Fila import Fila
 from historico import registrar_acao
 
 '''
