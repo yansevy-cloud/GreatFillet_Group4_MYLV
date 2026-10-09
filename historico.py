@@ -9,44 +9,83 @@ def registrar_acao(pilha_historico, tipo_acao, dados):
         "tipo": tipo_acao,
         "dados": dados.copy()
     }
-    pilha_historico.push(acao) 
-    pass
+    pilha_historico.push(acao)
 
 
-# Requisito RF-07: Desfazer Última Ação
-# Onde fica: Opção 7 do menu principal (main.py)
+# Desfaz a última ação registrada
 def desfazer_ultima_acao(pilha_historico, fila_cozinha, cardapio=None):
     if pilha_historico.isEmpty():
         print("Não há ações para desfazer.")
         return
 
     acao = pilha_historico.pop()
-
     tipo_acao = acao["tipo"]
     dados = acao["dados"]
 
+    # Desfaz o cadastro de um prato
+    if tipo_acao == "cadastrar_item":
+        if cardapio is None:
+            pilha_historico.push(acao)
+            print("Cardápio não disponível para desfazer.")
+            return
+
+        item = next(
+            (item for item in cardapio if item["id"] == dados["id"]),
+            None
+        )
+
+        if item is not None:
+            cardapio.remove(item)
+            print(f"Cadastro do prato '{dados['nome']}' desfeito.")
+        else:
+            pilha_historico.push(acao)
+            print("Prato não encontrado no cardápio.")
+
+    # Desfaz a remoção de um prato
+    elif tipo_acao == "remover_item":
+        if cardapio is None:
+            pilha_historico.push(acao)
+            print("Cardápio não disponível para desfazer.")
+            return
+
+        if not any(item["id"] == dados["id"] for item in cardapio):
+            cardapio.append(dados.copy())
+            print(f"Prato '{dados['nome']}' restaurado ao cardápio.")
+        else:
+            pilha_historico.push(acao)
+            print("Já existe um prato com esse ID no cardápio.")
+
     # Desfaz o lançamento de um pedido
-    if tipo_acao == "lancar_pedido":
+    elif tipo_acao == "lancar_pedido":
         pedidos = fila_cozinha._pacientes
 
-        if dados in pedidos:
-            pedidos.remove(dados)
+        # Procura da última posição para a primeira
+        indice = next(
+            (
+                i for i in range(len(pedidos) - 1, -1, -1)
+                if pedidos[i] == dados
+            ),
+            None
+        )
+
+        if indice is not None:
+            pedidos.pop(indice)
             print("Último pedido lançado foi cancelado.")
         else:
-            print("Pedido não encontrado na fila.")
             pilha_historico.push(acao)
+            print("Pedido não encontrado na fila.")
 
     # Desfaz o atendimento de um pedido
     elif tipo_acao == "atender_pedido":
-        fila_cozinha._pacientes.insert(0, dados)
+        fila_cozinha._pacientes.insert(0, dados.copy())
         print("Pedido devolvido ao início da fila.")
 
     else:
-        print("Tipo de ação não reconhecido.")
         pilha_historico.push(acao)
+        print(f"Tipo de ação não reconhecido: {tipo_acao}")
 
-# Requisito RF-08: Visualizar Histórico de Ações
-# Onde fica: Opção 8 do menu principal (main.py)
+
+# Visualiza o histórico sem retirar as ações da pilha
 def visualizar_historico(pilha_historico):
     if pilha_historico.isEmpty():
         print("\nO histórico está vazio.")
@@ -54,7 +93,6 @@ def visualizar_historico(pilha_historico):
 
     print("\n===== HISTÓRICO DE AÇÕES =====")
 
-    # Percorre a pilha do topo até a base, sem remover os registros
     for i, acao in enumerate(
         reversed(pilha_historico._elementos), start=1
     ):
@@ -62,18 +100,30 @@ def visualizar_historico(pilha_historico):
         dados = acao["dados"]
 
         if tipo_acao == "lancar_pedido":
-            print(
-                f"{i}. Pedido lançado - "
-                f"Cliente: {dados['CLIENTE']} - "
+            descricao = (
+                f"Pedido lançado - Cliente: {dados['CLIENTE']} - "
                 f"Itens: {dados['PEDIDOS']}"
             )
 
         elif tipo_acao == "atender_pedido":
-            print(
-                f"{i}. Pedido atendido - "
-                f"Cliente: {dados['CLIENTE']} - "
+            descricao = (
+                f"Pedido atendido - Cliente: {dados['CLIENTE']} - "
                 f"Itens: {dados['PEDIDOS']}"
             )
 
+        elif tipo_acao == "cadastrar_item":
+            descricao = (
+                f"Prato cadastrado - {dados['nome']} "
+                f"(ID: {dados['id']})"
+            )
+
+        elif tipo_acao == "remover_item":
+            descricao = (
+                f"Prato removido - {dados['nome']} "
+                f"(ID: {dados['id']})"
+            )
+
         else:
-            print(f"{i}. Ação realizada: {tipo_acao}")
+            descricao = f"Ação: {tipo_acao}"
+
+        print(f"{i}. {descricao}")
