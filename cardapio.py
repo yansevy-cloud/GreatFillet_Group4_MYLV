@@ -1,4 +1,5 @@
-def cadastrar_item(cardapio):
+from historico import registrar_acao
+def cadastrar_item(cardapio, pilha_historico):
     while True:
         try:
             id_item = int(input("Digite o ID do item: "))
@@ -35,20 +36,33 @@ def cadastrar_item(cardapio):
     })
 
     print(f"Item '{nome}' cadastrado com sucesso!")
+    registrar_acao(
+    pilha_historico,
+    "cadastrar_item",
+    cardapio[-1]
+    )
     
 
 
-def remover_item(cardapio):
+def remover_item(cardapio, pilha_historico):
     while True:
         try:
             id_item = int(input("Digite o ID do item a ser removido: "))
-            break 
+            break
         except ValueError:
             print("Erro: O ID deve ser um número inteiro.")
 
     for item in cardapio:
         if item["id"] == id_item:
+            item_removido = item.copy()
             cardapio.remove(item)
+
+            registrar_acao(
+                pilha_historico,
+                "remover_item",
+                item_removido
+            )
+
             print(f"Item ID {id_item} removido com sucesso!")
             return
 
