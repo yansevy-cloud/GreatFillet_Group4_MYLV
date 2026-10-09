@@ -35,6 +35,7 @@ def cadastrar_item(cardapio):
     })
 
     print(f"Item '{nome}' cadastrado com sucesso!")
+    registrar_acao(pilha_historico, "cadastrar_item", cardapio[-1])
 
 
 def remover_item(cardapio):
@@ -52,6 +53,7 @@ def remover_item(cardapio):
             return
 
     print("Erro: Item com este ID não foi encontrado no cardápio.")
+    registrar_acao(pilha_historico, "remover_item", item)
 
 
 def exibir_cardapio(cardapio):
