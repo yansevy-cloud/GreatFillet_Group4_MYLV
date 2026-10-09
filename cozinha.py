@@ -1,32 +1,19 @@
 from ClasseFila import Fila
-from ClasseFila import Fila
 from historico import registrar_acao
 
 '''
-Fila da Cozinha (Estrutura: Classe Fila fornecida): 
-Gerencia a ordem dos pedidos que aguardam preparo na cozinha.
-Garante o comportamento FIFO (First In, First Out) —
-o primeiro pedido cadastrado é o primeiro a ser preparado.
+Fila da Cozinha (Estrutura: Classe Fila fornecida):
+Gerencia a ordem dos pedidos aguardando preparo.
+O primeiro pedido cadastrado é o primeiro a ser atendido (FIFO).
 '''
 
-'''
-RF-04 (Lançar Pedido - Enfileirar):
-Registrar um pedido informando o Nome do Cliente 
-e os IDs dos Itens (validados no cardápio). 
-O pedido deve ser enfileirado na Fila da Cozinha.
-
-RF-05 (Atender Pedido - Desenfileirar): 
-Processar o próximo pedido da fila usando o método de 
-desenfileirar e exibir os dados do pedido finalizado.
-
-RF-06 (Visualizar Fila): 
-Exibir no terminal os pedidos aguardando preparo na cozinha.
-'''
-
-# Requisito RF-04: Lançar Pedido
-def popular_fila(filaCozinha, cardapio):
+# RF-04: Lançar Pedido
+def popular_fila(filaCozinha, cardapio, pilha_historico):
     while True:
-        nome = input("\nInsira o nome do seu cliente (Enter para finalizar os pedidos): ").strip().title()
+        nome = input(
+            "\nInsira o nome do cliente "
+            "(Enter para finalizar os pedidos): "
+        ).strip().title()
 
         if nome == "":
             print("Finalizando inserção de clientes...")
@@ -37,7 +24,12 @@ def popular_fila(filaCozinha, cardapio):
 
         while True:
             try:
-                ID_item = int(input("Digite o ID do item (0 para concluir o pedido do cliente): "))
+                ID_item = int(
+                    input(
+                        "Digite o ID do item "
+                        "(0 para concluir o pedido): "
+                    )
+                )
             except ValueError:
                 print("ERRO: digite um número inteiro.")
                 continue
@@ -50,35 +42,78 @@ def popular_fila(filaCozinha, cardapio):
                 print("Insira um ID válido!")
                 continue
 
-            ids_validos = [item["id"] for item in cardapio] if cardapio and isinstance(cardapio[0], dict) else []
+            ids_validos = [
+                item["id"]
+                for item in cardapio
+                if isinstance(item, dict) and "id" in item
+            ]
 
             if ID_item in ids_validos:
                 ItensPedidos.append(ID_item)
                 print(f"Item {ID_item} adicionado com sucesso!")
             else:
-                print(f"ERRO: ID {ID_item} não encontrado no cardápio!")
+                print(
+                    f"ERRO: ID {ID_item} "
+                    "não encontrado no cardápio!"
+                )
 
         if len(ItensPedidos) > 0:
             PedidoCliente["CLIENTE"] = nome
             PedidoCliente["PEDIDOS"] = ItensPedidos
 
+            # Adiciona o pedido ao final da fila
             filaCozinha.entrar(PedidoCliente)
-            print(f"Sucesso: Pedido do cliente '{nome}' enviado para a cozinha!")
+
+            # Registra o lançamento na pilha de histórico
+            registrar_acao(
+                pilha_historico,
+                "lancar_pedido",
+                PedidoCliente
+            )
+
+            print(
+                f"Sucesso: Pedido do cliente '{nome}' "
+                "enviado para a cozinha!"
+            )
         else:
-            print(f"Nenhum item válido adicionado para {nome}. Pedido não registrado.")
+            print(
+                f"Nenhum item válido adicionado para {nome}. "
+                "Pedido não registrado."
+            )
 
 
-# Requisito RF-05: Atender Pedido
-def atender_pedido(filaCozinha):
+# RF-05: Atender Pedido
+def atender_pedido(filaCozinha, pilha_historico):
     if filaCozinha.isEmpty():
         print("\nNão há pedidos para atender.")
         return
-    
+
+    # Retira o pedido mais antigo da fila
     pedido = filaCozinha.chamar()
-    print(f"\nPedido atendido: CLIENTE -> {pedido['CLIENTE']} | PEDIDOS -> {pedido['PEDIDOS']}")
+
+    if pedido is None:
+        print("\nNão foi possível obter o pedido.")
+        return
+
+    # Registra o atendimento para permitir desfazer
+    registrar_acao(
+        pilha_historico,
+        "atender_pedido",
+        pedido
+    )
+
+    print(
+        f"\nPedido atendido: CLIENTE -> {pedido['CLIENTE']} "
+        f"| PEDIDOS -> {pedido['PEDIDOS']}"
+    )
 
 
-# Requisito RF-06: Visualizar Fila
+# RF-06: Visualizar Fila
 def mostrar_pedidos(filaCozinha):
     print("\nPedidos a serem preparados:")
+
+    if filaCozinha.isEmpty():
+        print("Não há pedidos aguardando preparo.")
+        return
+
     filaCozinha.verFila()
