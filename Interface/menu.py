@@ -24,7 +24,6 @@ def exibir_menu():
     5. Atender Próximo Pedido
     6. Visualizar Fila da Cozinha
     7. Desfazer Última Ação
-    8. Visualizar Histórico de Ações
     0. Sair
     """)
 
