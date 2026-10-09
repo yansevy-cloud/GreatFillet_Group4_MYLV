@@ -83,3 +83,16 @@ def desfazer_ultima_acao(pilha_historico, fila_cozinha, cardapio=None):
     else:
         pilha_historico.push(acao)
         print(f"Tipo de ação não reconhecido: {tipo_acao}")
+
+def exibir_historico(pilha_historico):
+    if pilha_historico.isEmpty():
+        print("Não há ações para exibir.")
+        return
+
+    print("\nHistórico de Ações (do mais recente para o mais antigo):")
+    print("-" * 40)
+
+    for acao in reversed(pilha_historico._elementos):
+        print(f"{acao['tipo']}: {acao['dados']}")
+
+    print("\n" * 2)    

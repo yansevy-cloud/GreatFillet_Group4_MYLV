@@ -23,11 +23,9 @@ from Fila import Fila
 from Pilha import Pilha
 from cardapio import cadastrar_item, remover_item, exibir_cardapio
 from cozinha import popular_fila, atender_pedido, mostrar_pedidos
-from historico import desfazer_ultima_acao
-
+from historico import desfazer_ultima_acao, exibir_historico
 
 def main():
-    # Inicializa as estruturas de dados
     cardapio = []
     fila_cozinha = Fila()
     pilha_historico = Pilha()
@@ -68,6 +66,9 @@ def main():
                     fila_cozinha,
                     cardapio
                 )
+
+            case '8':
+                exibir_historico(pilha_historico)
 
             case '0':
                 print("Encerrando o sistema...")
