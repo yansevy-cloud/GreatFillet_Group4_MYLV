@@ -7,7 +7,6 @@ def cadastrar_item(cardapio, pilha_historico):
         except ValueError:
             print("Erro: O ID deve ser um número inteiro.")
 
-    # Verifica se o ID já existe
     for item in cardapio:
         if item["id"] == id_item:
             print("Erro: Já existe um item cadastrado com este ID!")
@@ -19,7 +18,6 @@ def cadastrar_item(cardapio, pilha_historico):
             break 
         print("Erro: O nome do prato não pode estar em branco.")
 
-    # Validação do Preço
     while True:
         try:
             preco = float(input("Digite o preço (R$): "))
@@ -83,8 +81,6 @@ def exibir_cardapio(cardapio):
         print(f"Preço: R$ {item['preco']:.2f}")
 
 
-# Função: buscar_item
-# Onde fica: Função auxiliar do cardápio para pesquisar e retornar um item pelo seu ID
 def buscar_item(cardapio, id_item):
     for item in cardapio:
         if item["id"] == id_item:
