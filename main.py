@@ -19,11 +19,11 @@
 # Ponto de entrada do sistema.
 
 from Interface.menu import exibir_menu, obter_opcao
-from ClasseFila import Fila
+from Fila import Fila
 from Pilha import Pilha
 from cardapio import cadastrar_item, remover_item, exibir_cardapio
 from cozinha import popular_fila, atender_pedido, mostrar_pedidos
-from historico import desfazer_ultima_acao, visualizar_historico
+from historico import desfazer_ultima_acao
 
 
 def main():
@@ -68,9 +68,6 @@ def main():
                     fila_cozinha,
                     cardapio
                 )
-
-            case '8':
-                visualizar_historico(pilha_historico)
 
             case '0':
                 print("Encerrando o sistema...")
